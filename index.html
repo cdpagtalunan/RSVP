@@ -780,6 +780,105 @@
     .music-toggle[aria-pressed="false"] .icon-off { display: block; }
 
     /* =====================================================================
+       11b. SCROLL JOURNEY — wedding car drives along the road as you scroll
+       ===================================================================== */
+    .journey {
+      --car-w: 132px;
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+      height: calc(70px + env(safe-area-inset-bottom));
+      pointer-events: none;
+      opacity: 0; transform: translateY(100%);
+      transition: opacity 0.8s var(--ease) 0.6s, transform 0.8s var(--ease-out-expo) 0.6s;
+    }
+    body.is-ready .journey { opacity: 1; transform: none; }
+    html:not(.js) .journey { display: none; }
+
+    .journey__road {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: calc(24px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, #3a3532, #2a2a2a);
+      border-top: 1px solid rgba(249, 248, 246, 0.18);
+      box-shadow: 0 -10px 24px -12px rgba(42, 42, 42, 0.35);
+    }
+    .journey__trail { /* traveled distance glows burgundy along the road edge */
+      position: absolute; left: 0; top: -1px; height: 2px; width: 0;
+      background: linear-gradient(90deg, rgba(107, 29, 47, 0.2), #b23a55);
+    }
+    .journey__pin {
+      position: absolute; top: 0; height: 24px;
+      transform: translateX(-50%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 8px; white-space: nowrap;
+      background: none; border: 0; cursor: pointer; pointer-events: auto;
+      font: 400 0.52rem/1 var(--font-sans); letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(249, 248, 246, 0.45);
+      transition: color 0.4s var(--ease);
+    }
+    .journey__pin::before {
+      content: ""; width: 5px; height: 5px; margin-right: 6px; transform: rotate(45deg);
+      background: currentColor;
+    }
+    .journey__pin.is-passed { color: rgba(249, 248, 246, 0.85); }
+    .journey__pin.is-passed::before { background: #d9788f; }
+    .journey__pin:hover { color: #fff; }
+
+    .car {
+      position: absolute; left: 0; bottom: calc(18px + env(safe-area-inset-bottom));
+      width: var(--car-w);
+      pointer-events: auto; cursor: pointer; padding: 0; border: 0; background: none;
+      will-change: transform;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .car__flip { display: block; transition: transform 0.5s var(--ease); }
+    .car.is-reverse .car__flip { transform: scaleX(-1); }
+    .car svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .car__body { transform-origin: 50% 100%; }
+    .car.is-driving .car__body { animation: car-bump 0.28s ease-in-out infinite; }
+    @keyframes car-bump {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-1.5px) rotate(-0.6deg); }
+    }
+    .car__cans { transform-origin: 8px 40px; }
+    .car.is-driving .car__cans { animation: cans-swing 0.35s ease-in-out infinite alternate; }
+    @keyframes cans-swing { from { transform: rotate(-5deg); } to { transform: rotate(7deg); } }
+    .car__wheel { transform-box: fill-box; transform-origin: center; }
+    .car:hover .car__body { filter: brightness(1.08); }
+    .car:focus-visible { outline: 1px solid var(--burgundy); outline-offset: 4px; }
+
+    .car__bubble {
+      position: absolute; left: 50%; bottom: 100%; margin-bottom: 4px;
+      padding: 6px 12px; border-radius: 14px;
+      background: var(--ivory); color: var(--burgundy);
+      font: italic 400 0.95rem/1 var(--font-serif); white-space: nowrap;
+      box-shadow: 0 8px 20px -8px rgba(42, 42, 42, 0.45);
+      opacity: 0; transform: translate(-50%, 6px) scale(0.9);
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+      pointer-events: none;
+    }
+    .car.is-honking .car__bubble { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    .car.is-honking .car__body { animation: car-honk 0.4s ease-in-out; }
+    @keyframes car-honk { 30% { transform: translateY(-5px) rotate(-2deg); } 60% { transform: translateY(0); } }
+
+    .heart-fx {
+      position: fixed; z-index: 44; pointer-events: none;
+      color: var(--burgundy); font-size: 14px; line-height: 1;
+      animation: heart-float 1.6s ease-out forwards;
+    }
+    @keyframes heart-float {
+      0%   { opacity: 0.95; transform: translate(0, 0) scale(0.6); }
+      100% { opacity: 0;    transform: translate(var(--dx, 0), -90px) scale(1.15) rotate(var(--rot, 0deg)); }
+    }
+
+    /* Leave room so the road never covers the last lines of the page */
+    .footer { padding-bottom: calc(40px + 72px); }
+    .music-toggle { bottom: calc(86px + env(safe-area-inset-bottom)); }
+
+    /* Hover feel for story photos + venue cards: gentle 3D tilt (set by JS) */
+    .tilt { transition: transform 0.5s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo), border-color 0.6s; will-change: transform; }
+    .js .tilt.is-visible { transition: transform 0.5s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo), border-color 0.6s; }
+    .js .tilt.is-visible.is-tilting { transition: transform 0.1s linear, box-shadow 0.6s var(--ease-out-expo); }
+
+    /* =====================================================================
        12. RESPONSIVE
        ===================================================================== */
     @media (max-width: 960px) {
@@ -798,6 +897,11 @@
       .timeline li::before { left: 69px; }
       .timeline time { font-size: 0.98rem; }
       .rsvp-form { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .journey { --car-w: 96px; }
+      .journey__pin { font-size: 0.46rem; letter-spacing: 0.14em; padding: 0 4px; }
+      .journey__pin::before { margin-right: 3px; }
     }
     @media (max-width: 420px) {
       .countdown__unit { padding: 14px 2px; }
@@ -1219,6 +1323,61 @@
     <p class="footer__small">Made with love · We can't wait to celebrate with you</p>
   </footer>
 
+  <!-- =====================================================================
+       SCROLL JOURNEY — the wedding car follows your scroll position.
+       Tap the car to honk!
+       ===================================================================== -->
+  <div class="journey" id="journey" aria-hidden="false">
+    <div class="journey__road" id="journey-road">
+      <span class="journey__trail" id="journey-trail"></span>
+      <button class="journey__pin" type="button" data-target="#story">Story</button>
+      <button class="journey__pin" type="button" data-target="#details">Details</button>
+      <button class="journey__pin" type="button" data-target="#gallery">Gallery</button>
+      <button class="journey__pin" type="button" data-target="#rsvp">RSVP</button>
+    </div>
+    <button class="car" id="car" type="button" aria-label="Wedding car — tap to honk">
+      <span class="car__bubble" id="car-bubble">Beep beep! Just married soon</span>
+      <span class="car__flip">
+        <svg viewBox="0 0 160 70" aria-hidden="true">
+          <!-- trailing ribbon + tin cans -->
+          <g class="car__cans">
+            <path d="M14 46 Q4 50 -6 56" fill="none" stroke="#b59a85" stroke-width="1"/>
+            <path d="M14 46 Q2 54 -14 52" fill="none" stroke="#b59a85" stroke-width="1"/>
+            <rect x="-10" y="55" width="7" height="9" rx="1.5" fill="#d9c3b4" stroke="#7a5c4d" stroke-width="0.8"/>
+            <rect x="-19" y="50" width="7" height="9" rx="1.5" fill="#e8dfd0" stroke="#7a5c4d" stroke-width="0.8"/>
+          </g>
+          <!-- shadow -->
+          <ellipse cx="82" cy="66" rx="64" ry="3.2" fill="rgba(0,0,0,0.35)"/>
+          <g class="car__body">
+            <!-- body -->
+            <path d="M12 52 L12 42 Q12 38 18 37 L40 35 Q48 21 66 20 L102 20 Q118 21 126 35 L144 38 Q152 40 152 47 L152 52 Z" fill="#6b1d2f"/>
+            <path d="M12 46 L152 46 L152 52 L12 52 Z" fill="#4f1422"/>
+            <!-- windows -->
+            <path d="M50 35 Q56 25 68 24 L82 24 L82 35 Z" fill="#dfe9ef" opacity="0.92"/>
+            <path d="M87 24 L101 24 Q112 25 118 35 L87 35 Z" fill="#dfe9ef" opacity="0.92"/>
+            <rect x="82" y="24" width="5" height="11" fill="#4f1422"/>
+            <!-- chrome trim + door line -->
+            <path d="M16 41 L146 41" stroke="#e8c9a8" stroke-width="1" opacity="0.7"/>
+            <path d="M85 36 L85 50" stroke="#4f1422" stroke-width="1"/>
+            <!-- heart decal -->
+            <path d="M104 45 c-3 -3 -6 0 -3 3 l3 3 l3 -3 c3 -3 0 -6 -3 -3z" transform="translate(-1 -6) scale(0.9)" fill="#f1e3d3"/>
+            <!-- headlight + tail light -->
+            <ellipse cx="149" cy="42" rx="3.2" ry="3" fill="#ffe9a8"/>
+            <rect x="11" y="41" width="3" height="5" rx="1" fill="#ff6b6b"/>
+            <!-- ribbon bow on bonnet -->
+            <path d="M128 36 l-7 -5 l1 8 z M128 36 l7 -5 l-1 8 z" fill="#f1e3d3" transform="translate(-8 -2)"/>
+            <circle cx="120" cy="34" r="1.8" fill="#d9c3b4"/>
+            <!-- "just married" plate -->
+            <rect x="22" y="40" width="0" height="0"/>
+          </g>
+          <!-- wheels -->
+          <g class="car__wheel" id="wheel-r"><circle cx="40" cy="52" r="10" fill="#1e1e1e"/><circle cx="40" cy="52" r="5.4" fill="#d9c3b4"/><path d="M40 47 V57 M35 52 H45" stroke="#7a5c4d" stroke-width="1.4"/></g>
+          <g class="car__wheel" id="wheel-f"><circle cx="124" cy="52" r="10" fill="#1e1e1e"/><circle cx="124" cy="52" r="5.4" fill="#d9c3b4"/><path d="M124 47 V57 M119 52 H129" stroke="#7a5c4d" stroke-width="1.4"/></g>
+        </svg>
+      </span>
+    </button>
+  </div>
+
   <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false" aria-label="Toggle background music">
     <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>
     <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/><path d="M3 3l18 18"/></svg>
@@ -1544,6 +1703,130 @@
       '&dates=' + c.start + '/' + c.end +
       '&location=' + encodeURIComponent(c.location) +
       '&details=' + encodeURIComponent(c.details);
+
+    /* ---------- 8. Scroll journey: the wedding car ---------- */
+    const journey  = $('#journey');
+    const car      = $('#car');
+    const trail    = $('#journey-trail');
+    const pins     = $$('.journey__pin');
+    const wheels   = $$('.car__wheel', car);
+    const bubble   = $('#car-bubble');
+    let carW = 132, trackW = 0, maxScroll = 1, lastY = window.scrollY, drivingTimer, lastHeartAt = 0, ticking = false;
+
+    function layoutJourney() {
+      carW = car.offsetWidth;
+      trackW = Math.max(window.innerWidth - carW, 1);
+      maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      pins.forEach(p => {
+        const target = $(p.dataset.target);
+        if (!target) return;
+        const frac = Math.min(Math.max((target.getBoundingClientRect().top + window.scrollY) / maxScroll, 0.04), 0.96);
+        p.dataset.frac = frac;
+        p.style.left = (frac * trackW + carW / 2) + 'px';
+      });
+      drawCar();
+    }
+
+    function drawCar() {
+      ticking = false;
+      const y = window.scrollY;
+      const progress = Math.min(Math.max(y / maxScroll, 0), 1);
+      const x = progress * trackW;
+      car.style.transform = 'translate3d(' + x + 'px,0,0)';
+      trail.style.width = (x + carW / 2) + 'px';
+      // wheels turn with the distance travelled
+      const deg = (x / 10) * (180 / Math.PI) * 1;
+      wheels.forEach(w => { w.style.transform = 'rotate(' + deg + 'deg)'; });
+      pins.forEach(p => p.classList.toggle('is-passed', progress >= parseFloat(p.dataset.frac || 2)));
+
+      const dy = y - lastY;
+      if (Math.abs(dy) > 1) {
+        car.classList.toggle('is-reverse', dy < 0);
+        if (!prefersReducedMotion) {
+          car.classList.add('is-driving');
+          clearTimeout(drivingTimer);
+          drivingTimer = setTimeout(() => car.classList.remove('is-driving'), 180);
+          const now = performance.now();
+          if (now - lastHeartAt > 260) { lastHeartAt = now; spawnHeart(x + (dy < 0 ? carW - 10 : 10)); }
+        }
+      }
+      lastY = y;
+    }
+
+    function spawnHeart(x, burst) {
+      const h = document.createElement('span');
+      h.className = 'heart-fx';
+      h.textContent = '♥';
+      const rect = car.getBoundingClientRect();
+      h.style.left = (burst ? rect.left + rect.width / 2 : x) + 'px';
+      h.style.top  = (rect.top + 8) + 'px';
+      h.style.setProperty('--dx', (burst ? (Math.random() * 120 - 60) : (Math.random() * 30 - 15)) + 'px');
+      h.style.setProperty('--rot', (Math.random() * 40 - 20) + 'deg');
+      h.style.fontSize = (10 + Math.random() * (burst ? 14 : 6)) + 'px';
+      document.body.appendChild(h);
+      h.addEventListener('animationend', () => h.remove());
+    }
+
+    let audioCtx;
+    function honk() {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.22].forEach(delay => {
+          const t = audioCtx.currentTime + delay;
+          const g = audioCtx.createGain();
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+          g.connect(audioCtx.destination);
+          [392, 494].forEach(f => {
+            const o = audioCtx.createOscillator();
+            o.type = 'square'; o.frequency.value = f;
+            o.connect(g); o.start(t); o.stop(t + 0.18);
+          });
+        });
+      } catch (e) { /* audio unavailable */ }
+    }
+
+    let honkTimer;
+    car.addEventListener('click', () => {
+      honk();
+      car.classList.remove('is-honking'); void car.offsetWidth;
+      car.classList.add('is-honking');
+      for (let i = 0; i < 8; i++) setTimeout(() => spawnHeart(0, true), i * 60);
+      clearTimeout(honkTimer);
+      honkTimer = setTimeout(() => car.classList.remove('is-honking'), 1500);
+    });
+
+    pins.forEach(p => p.addEventListener('click', () => {
+      const t = $(p.dataset.target);
+      if (t) t.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    }));
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(drawCar); }
+    }, { passive: true });
+    window.addEventListener('resize', layoutJourney);
+    window.addEventListener('load', layoutJourney);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutJourney);
+    layoutJourney();
+
+    /* ---------- 9. Interactive polish: 3D tilt on cards (fine pointers only) ---------- */
+    if (!prefersReducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      $$('.venue, .panel').forEach(el => {
+        el.classList.add('tilt');
+        el.addEventListener('pointermove', e => {
+          const r = el.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          el.classList.add('is-tilting');
+          el.style.transform = 'perspective(900px) rotateY(' + (px * 5) + 'deg) rotateX(' + (-py * 5) + 'deg) translateY(-6px)';
+        });
+        el.addEventListener('pointerleave', () => {
+          el.classList.remove('is-tilting');
+          el.style.transform = '';
+        });
+      });
+    }
 
     /* ---------- Helpers ---------- */
     function sessionStorageGet(key) {
