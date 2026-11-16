@@ -20,7 +20,7 @@
   <!-- Typography: Cormorant Garamond (serif headings) + Jost (clean sans body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
   <!-- Flag JS support before first paint so the splash never flashes for no-JS visitors -->
   <script>document.documentElement.classList.add('js');</script>
@@ -639,6 +639,79 @@
     .gallery .g-wide { grid-column: span 2; }
 
     /* =====================================================================
+       9b. NOTES + PHOTOS COLLAGE (replaces the plain gallery)
+       ===================================================================== */
+    .section--notes {
+      background: linear-gradient(180deg, #fffaf0 0%, #fbf0dc 55%, #f8ead2 100%);
+      overflow: hidden;
+    }
+    .notes {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 64px);
+      align-items: center;
+    }
+    .note {
+      position: relative;
+      display: flex; align-items: center; gap: clamp(8px, 2vw, 24px);
+      min-height: 280px;
+    }
+    .note--art-left { flex-direction: row; }
+    .note__text { flex: 1 1 auto; min-width: 0; }
+    .note h3 {
+      font: 300 clamp(1.7rem, 3vw, 2.4rem)/1.1 var(--font-serif);
+      text-transform: uppercase; letter-spacing: 0.03em;
+      margin-bottom: 0.7rem; color: #1f1a17;
+    }
+    .note p {
+      margin: 0; text-align: justify; hyphens: auto;
+      font: 400 clamp(1.1rem, 1.7vw, 1.35rem)/1.35 var(--font-serif);
+      color: #2a2420;
+    }
+    .note p strong { font-weight: 700; }
+    .note__art {
+      flex: 0 0 auto; width: clamp(96px, 15vw, 190px); height: auto;
+      transform-origin: 50% 100%;
+      animation: sway 6s ease-in-out infinite;
+      filter: drop-shadow(0 6px 8px rgba(122, 92, 77, 0.12));
+    }
+    .note:nth-of-type(even) .note__art { animation-delay: -2s; }
+    .note:hover .note__art { animation-duration: 2.4s; }
+    @keyframes sway { 0%, 100% { transform: rotate(-1.8deg); } 50% { transform: rotate(2deg); } }
+
+    /* photos styled like taped prints */
+    .note__photo {
+      width: min(100%, 360px); aspect-ratio: 4 / 5; margin-inline: auto;
+      padding: 10px; background: #fffdf8;
+      box-shadow: 0 18px 40px -22px rgba(42, 42, 42, 0.45);
+      transition: transform 0.6s var(--ease-out-expo);
+    }
+    .note__photo img { height: 100%; }
+    .note__photo::before { /* washi tape */
+      content: ""; position: absolute; z-index: 2; top: -10px; left: 50%;
+      width: 84px; height: 22px; transform: translateX(-50%) rotate(-3deg);
+      background: rgba(150, 148, 108, 0.55);
+      clip-path: polygon(0 10%, 4% 0, 8% 12%, 12% 0, 16% 10%, 100% 10%, 96% 100%, 92% 88%, 88% 100%, 84% 90%, 0 90%);
+    }
+    .note__photo--a { transform: rotate(2deg); }
+    .note__photo--b { transform: rotate(-2deg); }
+    .note__photo--c { transform: rotate(-1.5deg); }
+    .note__photo--d { transform: rotate(2.2deg); }
+    .js .note__photo.is-visible:hover { transform: rotate(0deg) scale(1.03); }
+    .js .note__photo--a.is-visible { transform: rotate(2deg); }
+    .js .note__photo--b.is-visible { transform: rotate(-2deg); }
+    .js .note__photo--c.is-visible { transform: rotate(-1.5deg); }
+    .js .note__photo--d.is-visible { transform: rotate(2.2deg); }
+    .js .note__photo.is-visible:hover { transform: rotate(0deg) scale(1.03); }
+
+    @media (max-width: 760px) {
+      .notes { grid-template-columns: 1fr; }
+      .note { min-height: 0; }
+      .note__photo { width: min(78%, 320px); }
+      /* keep note/photo rhythm on mobile: art always beside text */
+    }
+    @media (prefers-reduced-motion: reduce) { .note__art { animation: none; } }
+
+    /* =====================================================================
        10. RSVP
        ===================================================================== */
     .rsvp__card {
@@ -965,7 +1038,7 @@
       <ul class="nav__links" id="nav-links">
         <li><a href="#story">Our Story</a></li>
         <li><a href="#details">Details</a></li>
-        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#gallery">Notes</a></li>
         <li><a href="#rsvp">RSVP</a></li>
       </ul>
     </div>
@@ -1173,39 +1246,174 @@
     <!-- =====================================================================
          GALLERY — prenup / engagement photos
          ===================================================================== -->
-    <section class="section" id="gallery">
+    <section class="section section--notes" id="gallery">
+      <!-- Shared botanical illustrations (drawn inline so no extra files are needed).
+           TODO: swap any <svg class="note__art"> for <img src="images/your-flower.png"> if you have the artwork. -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="wc" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="4" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+          </filter>
+          <symbol id="bloom" viewBox="-20 -20 40 40">
+            <g fill="currentColor" opacity="0.88">
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(45)"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(90)"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(135)"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(180)"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(225)"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(270)"/>
+              <ellipse cx="0" cy="-10" rx="5.5" ry="10" transform="rotate(315)"/>
+            </g>
+            <circle r="4" fill="#7a4a3a" opacity="0.85"/>
+          </symbol>
+          <symbol id="leaf" viewBox="-8 -32 16 34">
+            <path d="M0 0 C7 -8 7 -22 0 -31 C-7 -22 -7 -8 0 0Z" fill="currentColor"/>
+            <path d="M0 -2 V-27" stroke="rgba(255,255,255,.35)" stroke-width="0.8"/>
+          </symbol>
+        </defs>
+      </svg>
+
       <div class="container">
         <header class="section__head reveal">
-          <span class="eyebrow">Moments</span>
-          <h2 class="section__title">Our <em>gallery</em></h2>
+          <span class="eyebrow">Good to know</span>
+          <h2 class="section__title">Little notes &amp; <em>moments</em></h2>
           <div class="ornament" aria-hidden="true"><span></span></div>
         </header>
 
-        <div class="gallery">
-          <figure class="photo g-tall reveal reveal--zoom">
-            <!-- TODO: Insert Photo Here — portrait works best (tall tile) -->
-            <span class="photo__placeholder">Photo 01</span>
+        <div class="notes">
+
+          <!-- 1 · Gift guide -->
+          <article class="note reveal">
+            <div class="note__text">
+              <h3>On Gifts</h3>
+              <p>Having you celebrate with us is the greatest gift we could ask for. Should you wish to bless us further, a <strong>monetary contribution toward our new home</strong> would be gratefully received as we begin our life together.</p>
+            </div>
+            <svg class="note__art" viewBox="0 0 120 300" aria-hidden="true">
+              <g filter="url(#wc)">
+                <path d="M58 292 C56 230 66 160 60 70" fill="none" stroke="#6b3a45" stroke-width="2.2"/>
+                <path d="M60 200 C50 185 40 175 30 160 M62 150 C74 138 86 128 92 112 M60 110 C52 98 44 92 38 80" fill="none" stroke="#6b3a45" stroke-width="1.4"/>
+                <g fill="#ecdca8" opacity="0.8">
+                  <ellipse cx="60" cy="40" rx="16" ry="34"/><ellipse cx="44" cy="62" rx="12" ry="24" transform="rotate(-20 44 62)"/>
+                  <ellipse cx="78" cy="58" rx="12" ry="26" transform="rotate(18 78 58)"/><ellipse cx="62" cy="90" rx="14" ry="18"/>
+                </g>
+                <g fill="#f3e6bd" opacity="0.9"><ellipse cx="58" cy="30" rx="8" ry="22"/><ellipse cx="72" cy="70" rx="7" ry="14"/></g>
+                <g fill="#7d3a3f" opacity="0.9">
+                  <circle cx="30" cy="158" r="6"/><circle cx="24" cy="170" r="4.5"/><circle cx="92" cy="110" r="6"/><circle cx="98" cy="122" r="4.5"/>
+                  <circle cx="38" cy="78" r="5.5"/><circle cx="46" cy="66" r="4"/><circle cx="82" cy="96" r="5"/>
+                </g>
+              </g>
+            </svg>
+          </article>
+
+          <figure class="photo note__photo note__photo--a reveal reveal--zoom" style="--delay:120ms">
+            <img src="images/engagement1.JPG" alt="Christian and Ijane" loading="lazy">
           </figure>
-          <figure class="photo reveal reveal--zoom" style="--delay: 80ms">
-            <!-- TODO: Insert Photo Here -->
-            <span class="photo__placeholder">Photo 02</span>
+
+          <!-- 2 · No plus ones -->
+          <figure class="photo note__photo note__photo--b reveal reveal--zoom">
+            <img src="images/engagement2.JPG" alt="Christian and Ijane" loading="lazy">
           </figure>
-          <figure class="photo reveal reveal--zoom" style="--delay: 160ms">
-            <!-- TODO: Insert Photo Here -->
-            <span class="photo__placeholder">Photo 03</span>
+
+          <article class="note reveal" style="--delay:120ms">
+            <div class="note__text">
+              <h3>Guest List</h3>
+              <p>We are keeping our day small and close to the heart. With seats carefully set for the people dearest to us, we kindly ask that <strong>only the guests named on your invitation</strong> attend.</p>
+            </div>
+            <svg class="note__art" viewBox="0 0 170 290" aria-hidden="true">
+              <g filter="url(#wc)">
+                <g fill="none" stroke="#b9ab78" stroke-width="2">
+                  <path d="M85 285 C80 230 50 190 40 120"/><path d="M85 285 C86 220 90 170 92 100"/>
+                  <path d="M85 285 C95 230 130 190 140 110"/><path d="M85 285 C70 240 30 220 18 190"/>
+                  <path d="M85 285 C100 250 140 235 154 210"/>
+                </g>
+                <g fill="#c9bd86" opacity="0.85">
+                  <use href="#leaf" x="40" y="190" width="14" height="30" transform="rotate(-40 40 190)"/>
+                  <use href="#leaf" x="128" y="190" width="14" height="30" transform="rotate(40 128 190)"/>
+                  <use href="#leaf" x="66" y="215" width="14" height="30" transform="rotate(-20 66 215)"/>
+                </g>
+                <g fill="#a074c4" opacity="0.9">
+                  <ellipse cx="22" cy="40" rx="6" ry="9" transform="rotate(-20 22 40)"/><ellipse cx="30" cy="62" rx="6" ry="9" transform="rotate(-10 30 62)"/>
+                  <ellipse cx="14" cy="78" rx="5" ry="8"/><ellipse cx="146" cy="20" rx="6" ry="9" transform="rotate(20 146 20)"/>
+                  <ellipse cx="152" cy="46" rx="6" ry="9"/><ellipse cx="136" cy="64" rx="5" ry="8" transform="rotate(10 136 64)"/>
+                  <ellipse cx="46" cy="96" rx="5" ry="8"/><ellipse cx="124" cy="96" rx="5" ry="8"/>
+                </g>
+                <g>
+                  <use href="#bloom" x="62" y="52" width="44" height="44" style="color:#f0cf7a"/>
+                  <use href="#bloom" x="88" y="70" width="50" height="50" style="color:#f0cf7a"/>
+                  <use href="#bloom" x="32" y="92" width="56" height="56" style="color:#e9bfb5"/>
+                  <use href="#bloom" x="104" y="28" width="44" height="44" style="color:#efc6bf"/>
+                  <use href="#bloom" x="20" y="64" width="34" height="34" style="color:#efc6bf"/>
+                </g>
+              </g>
+            </svg>
+          </article>
+
+          <!-- 3 · Snap and share -->
+          <article class="note note--art-left reveal">
+            <svg class="note__art" viewBox="0 0 170 260" aria-hidden="true">
+              <g filter="url(#wc)">
+                <g fill="none" stroke="#a89a6e" stroke-width="1.8">
+                  <path d="M60 240 C56 190 62 130 52 70"/><path d="M60 240 C70 190 88 140 100 100"/>
+                  <path d="M60 240 C40 200 28 150 24 120"/><path d="M60 240 C86 200 118 170 136 140"/>
+                  <path d="M60 240 C52 210 70 150 78 40"/>
+                </g>
+                <g fill="#e9a58f" opacity="0.9">
+                  <circle cx="52" cy="62" r="5"/><circle cx="40" cy="70" r="4"/><circle cx="64" cy="72" r="4"/><circle cx="52" cy="78" r="3.5"/><circle cx="48" cy="54" r="3.5"/>
+                  <circle cx="100" cy="92" r="5"/><circle cx="90" cy="102" r="4"/><circle cx="112" cy="100" r="4"/><circle cx="102" cy="108" r="3.5"/>
+                  <circle cx="24" cy="112" r="5"/><circle cx="14" cy="122" r="4"/><circle cx="34" cy="120" r="4"/><circle cx="24" cy="128" r="3.5"/>
+                  <circle cx="136" cy="132" r="5"/><circle cx="126" cy="142" r="4"/><circle cx="148" cy="140" r="4"/>
+                  <circle cx="78" cy="34" r="5"/><circle cx="68" cy="42" r="4"/><circle cx="90" cy="42" r="4"/><circle cx="80" cy="50" r="3.5"/>
+                </g>
+                <g transform="rotate(-4 70 215)">
+                  <rect x="6" y="204" width="130" height="30" fill="#8c8a67" opacity="0.92"/>
+                  <path d="M6 204 l6 4 l5 -4 l6 5 l7 -5 l6 4 l7 -4 l7 5 l7 -5 l6 4 l7 -4 l6 5 l7 -5 l6 4 l6 -4 l7 5 l7 -5 l5 4" fill="none" stroke="#c9c6a8" stroke-width="2"/>
+                </g>
+              </g>
+            </svg>
+            <div class="note__text">
+              <h3>Share the Day</h3>
+              <p>Capture a moment? We would love to see it! <strong>Tag us in your posts</strong>, or drop your favorite photos into our <strong>shared album</strong> by scanning the QR code you will find at your table.</p>
+            </div>
+          </article>
+
+          <figure class="photo note__photo note__photo--c reveal reveal--zoom" style="--delay:120ms">
+            <img src="images/caleruega.jpg" alt="Caleruega Chapel" loading="lazy">
           </figure>
-          <figure class="photo g-tall reveal reveal--zoom" style="--delay: 240ms">
-            <!-- TODO: Insert Photo Here — portrait works best (tall tile) -->
-            <span class="photo__placeholder">Photo 04</span>
+
+          <!-- 4 · Last dance -->
+          <figure class="photo note__photo note__photo--d reveal reveal--zoom">
+            <img src="images/caleruega1.jpg" alt="Caleruega Chapel" loading="lazy">
           </figure>
-          <figure class="photo g-wide reveal reveal--zoom" style="--delay: 120ms">
-            <!-- TODO: Insert Photo Here — landscape works best (wide tile) -->
-            <span class="photo__placeholder">Photo 05</span>
-          </figure>
-          <figure class="photo g-wide reveal reveal--zoom" style="--delay: 200ms">
-            <!-- TODO: Insert Photo Here — landscape works best (wide tile) -->
-            <span class="photo__placeholder">Photo 06</span>
-          </figure>
+
+          <article class="note note--art-left reveal" style="--delay:120ms">
+            <svg class="note__art" viewBox="0 0 170 300" aria-hidden="true">
+              <g filter="url(#wc)">
+                <g fill="none" stroke="#7d8a93" stroke-width="1.8">
+                  <path d="M88 295 C86 230 80 160 70 40"/><path d="M86 220 C64 200 48 180 40 150"/>
+                  <path d="M84 180 C110 160 128 140 138 108"/><path d="M80 120 C66 108 52 96 48 70"/>
+                </g>
+                <g>
+                  <use href="#leaf" x="22" y="118" width="22" height="46" style="color:#9fb3c4" transform="rotate(-55 33 164)"/>
+                  <use href="#leaf" x="34" y="84" width="22" height="46" style="color:#b79a78" transform="rotate(-30 45 130)"/>
+                  <use href="#leaf" x="118" y="76" width="22" height="46" style="color:#9fb3c4" transform="rotate(48 129 122)"/>
+                  <use href="#leaf" x="108" y="118" width="24" height="50" style="color:#b79a78" transform="rotate(62 120 168)"/>
+                  <use href="#leaf" x="56" y="140" width="26" height="54" style="color:#b79a78" transform="rotate(-70 69 194)"/>
+                  <use href="#leaf" x="82" y="190" width="26" height="54" style="color:#9fb3c4" transform="rotate(70 95 244)"/>
+                  <use href="#leaf" x="56" y="20" width="22" height="46" style="color:#9fb3c4" transform="rotate(-8 67 66)"/>
+                  <use href="#leaf" x="60" y="60" width="24" height="50" style="color:#a98c6e" transform="rotate(14 72 110)"/>
+                  <use href="#leaf" x="40" y="190" width="24" height="50" style="color:#a98c6e" transform="rotate(-40 52 240)"/>
+                </g>
+                <g fill="#8aa0b4" opacity="0.8"><circle cx="70" cy="34" r="4"/><circle cx="76" cy="46" r="3"/><circle cx="62" cy="48" r="3"/></g>
+              </g>
+            </svg>
+            <div class="note__text">
+              <h3>Till the Night Ends</h3>
+              <p>The music winds down and the venue closes its doors at <strong>10:00 PM</strong>, but our thankfulness for having you with us will carry on long after the last song.</p>
+            </div>
+          </article>
+
         </div>
       </div>
     </section>
@@ -1332,7 +1540,7 @@
       <span class="journey__trail" id="journey-trail"></span>
       <button class="journey__pin" type="button" data-target="#story">Story</button>
       <button class="journey__pin" type="button" data-target="#details">Details</button>
-      <button class="journey__pin" type="button" data-target="#gallery">Gallery</button>
+      <button class="journey__pin" type="button" data-target="#gallery">Notes</button>
       <button class="journey__pin" type="button" data-target="#rsvp">RSVP</button>
     </div>
     <button class="car" id="car" type="button" aria-label="Wedding car — tap to honk">
